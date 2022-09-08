@@ -14,6 +14,11 @@ namespace CSConbinator
             Len = len;
         }
 
+        public string Str(string str)
+        {
+            return str.Substring((int) Start, (int) (Start + Len));
+        }
+
         public override string ToString()
         {
             return $"(Span start: {Start}, len: {Len})";
