@@ -62,5 +62,10 @@ namespace CSConbinator
 
             return children;
         }
+
+        public static bool IsNullOrEmpty(this List<AstNode> astNodes)
+        {
+            return astNodes == null || astNodes.Count == 0;
+        }
     }
 }

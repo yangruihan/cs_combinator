@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSConbinator", "CSConbinator\CSConbinator.csproj", "{DDBCECD6-21BA-41BD-AF3B-81DCD330444E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrammarParseTest", "GrammarParseTest\GrammarParseTest.csproj", "{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{DDBCECD6-21BA-41BD-AF3B-81DCD330444E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDBCECD6-21BA-41BD-AF3B-81DCD330444E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDBCECD6-21BA-41BD-AF3B-81DCD330444E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

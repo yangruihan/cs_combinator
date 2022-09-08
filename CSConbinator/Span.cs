@@ -16,7 +16,7 @@ namespace CSConbinator
 
         public string Str(string str)
         {
-            return str.Substring((int) Start, (int) (Start + Len));
+            return str.Substring((int) Start, (int) Len);
         }
 
         public override string ToString()

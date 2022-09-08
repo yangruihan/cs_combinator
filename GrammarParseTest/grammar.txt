@@ -1,0 +1,68 @@
+products   = ( product ( ";" )+ ( EOL )* )* EOF;
+
+product    = SYMBOL "=" expr;
+expr       = ( or_expr ( EOL )* )+;
+or_expr    = many ( ( EOL )* "|" many )*;
+many       = paren ( SUFFIX )?;
+paren      = primary | ( "(" expr ")" );
+primary    = TERMINATOR | SYMBOL;
+
+SUFFIX     = "*" | "?" | "+";
+TERMINATOR = #lua#
+            function(src)
+                local mod = 0
+
+                if src:sub(1, 1) == '"' then
+                    mod = 1
+                elseif src:sub(1, 1) == "#" then
+                    mod = 2
+                else
+                    return nil
+                end
+
+                local len = 0
+
+                if mod == 1 then
+                    len = 1
+                    local i = 2
+                    while i <= #src do
+                        if src:sub(i, i) == "\\" and src:sub(i + 1, i + 1) == '"' then
+                            i = i + 1
+                            len = len + 1
+                        elseif src:sub(i, i) == '"' then
+                            len = len + 1
+                            break
+                        end
+
+                        len = len + 1
+                        i = i + 1
+                    end
+                else
+                    local symbol = "#"
+                    for i = 2, #src do
+                        if src:sub(i, i) ~= "#" then
+                            symbol = symbol .. src:sub(i, i)
+                        else
+                            symbol = symbol .. "#"
+                            break
+                        end
+                    end
+
+                    len = #symbol
+                    local i = len + 1
+                    while i <= #src do
+                        if src:sub(i, i + #symbol - 1) == symbol then
+                            len = len + #symbol
+                            break
+                        end
+
+                        len = len + 1
+                        i = i + 1
+                    end
+                end
+
+                return len
+            end
+            #lua#;
+SYMBOL     = #re#[%a_][%w_]*#re#;
+EOL        = "\n";

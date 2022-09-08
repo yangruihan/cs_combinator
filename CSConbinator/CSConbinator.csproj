@@ -45,6 +45,7 @@
         <Compile Include="Common\Result.cs" />
         <Compile Include="Common\Utils.cs" />
         <Compile Include="Grammar.cs" />
+        <Compile Include="GrammarParser.cs" />
         <Compile Include="ParseError.cs" />
         <Compile Include="Parser.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
