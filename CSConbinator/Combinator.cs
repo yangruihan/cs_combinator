@@ -25,9 +25,11 @@ namespace CSConbinator
 
     public class Combinator
     {
-        public string Name { get; }
-        public string Info { get; }
-        public ParseCallback ParseCb { get; }
+        public string Name { get; set; }
+        public string Info { get; set; }
+        public ParseCallback ParseCb { get; set; }
+
+        internal Combinator Parent { get; set; }
 
         public Combinator(string name, string info, ParseCallback parseCb)
         {
@@ -156,6 +158,11 @@ namespace CSConbinator
 
                     return Result<ParseCallbackRet>.Err(ret.Error);
                 });
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}: {Info}";
         }
 
         public static Combinator operator +(Combinator a, Combinator b)
