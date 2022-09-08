@@ -26,7 +26,7 @@ namespace CSConbinator
 
                 if (!parseSuc)
                 {
-                    return Result<List<Token>>.Err(new NoMatchRuleError(src.Substring((int) offset, 10)));
+                    return Result<List<Token>>.Err(new NoMatchRuleError(src.SafeSubstring((int)offset, 10)));
                 }
             }
 
