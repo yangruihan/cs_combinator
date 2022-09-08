@@ -4,7 +4,7 @@ namespace CSConbinator
 {
     public class Scanner
     {
-        public Result<List<Token>> Scan(string src, TokenRule[] rules)
+        public Result<Token[]> Scan(string src, TokenRule[] rules)
         {
             var ret = new List<Token>();
             uint offset = 0;
@@ -26,11 +26,11 @@ namespace CSConbinator
 
                 if (!parseSuc)
                 {
-                    return Result<List<Token>>.Err(new NoMatchRuleError(src.SafeSubstring((int)offset, 10)));
+                    return Result<Token[]>.Err(new NoMatchRuleError(src.SafeSubstring((int)offset, 10)));
                 }
             }
 
-            return Result<List<Token>>.Ok(ret);
+            return Result<Token[]>.Ok(ret.ToArray());
         }
     }
 }
