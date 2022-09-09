@@ -24,43 +24,44 @@ namespace CSConbinator
 
         public static List<AstNode> ReplaceInnerAstNode(List<AstNode> children)
         {
-            if (children == null)
+            while (true)
             {
-                return null;
-            }
-
-            if (children.Count == 1 && children[0].Type.IsInnerSymbol())
-            {
-                return ReplaceInnerAstNode(children[0].Children);
-            }
-
-            if (children.Count > 1)
-            {
-                var newChildren = new List<AstNode>();
-
-                foreach (var child in children)
+                if (children == null)
                 {
-                    if (child.Type.IsInnerSymbol())
-                    {
-                        var expandChild = ReplaceInnerAstNode(child.Children);
-                        if (expandChild != null)
-                        {
-                            foreach (var c in expandChild)
-                            {
-                                newChildren.Add(c);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        newChildren.Add(child);
-                    }
+                    return null;
                 }
 
-                children = newChildren;
-            }
+                if (children.Count == 1 && children[0].Type.IsInnerSymbol())
+                {
+                    children = children[0].Children;
+                    continue;
+                }
 
-            return children;
+                if (children.Count > 1)
+                {
+                    var newChildren = new List<AstNode>();
+
+                    foreach (var child in children)
+                    {
+                        if (child.Type.IsInnerSymbol())
+                        {
+                            var expandChild = ReplaceInnerAstNode(child.Children);
+                            if (expandChild != null)
+                            {
+                                newChildren.AddRange(expandChild);
+                            }
+                        }
+                        else
+                        {
+                            newChildren.Add(child);
+                        }
+                    }
+
+                    children = newChildren;
+                }
+
+                return children;
+            }
         }
 
         public static bool IsNullOrEmpty(this List<AstNode> astNodes)

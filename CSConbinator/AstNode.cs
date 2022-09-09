@@ -38,7 +38,7 @@ namespace CSConbinator
                 return src;
             }
 
-            return $"<AstNode type: {Type}, lexeme: {ToReadable(Lexeme).Truncate(30)}, child_count: {Children.Count}>";
+            return $"<AstNode type: {Type} lexeme:`{ToReadable(Lexeme).Truncate(30)}` child_count: {Children?.Count ?? 0}>";
         }
     }
 }

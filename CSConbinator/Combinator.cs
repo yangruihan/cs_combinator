@@ -46,6 +46,7 @@ namespace CSConbinator
             }
 
             var ret = ParseCb.Invoke(src, offset);
+
             if (!ret.IsSuccess)
             {
                 return Result<ParseRet>.Err(ret.Error);
@@ -57,7 +58,7 @@ namespace CSConbinator
                 return Result<ParseRet>.Ok(new ParseRet(node, ret.Ret.Offset));
             }
 
-            if (ret.Ret.Children != null && ret.Ret.Children.Count > 0)
+            if (!ret.Ret.Children.IsNullOrEmpty())
             {
                 return Result<ParseRet>.Ok(new ParseRet(
                     new AstNode(Name, ret.Ret.Lexeme, ret.Ret.Children),
@@ -69,7 +70,7 @@ namespace CSConbinator
                 ret.Ret.Offset));
         }
 
-        public Combinator Add(Combinator other)
+        private Combinator Add(Combinator other)
         {
             var name = $"{Common.InnerSymbol}({Name} + {other.Name})";
             var info =
@@ -89,7 +90,7 @@ namespace CSConbinator
                     var ret2 = other.Parse(src, ret.Ret.Offset);
                     if (!ret2.IsSuccess)
                     {
-                        return Result<ParseCallbackRet>.Err(ret.Error);
+                        return Result<ParseCallbackRet>.Err(ret2.Error);
                     }
 
                     var children = new List<AstNode>();
@@ -98,21 +99,13 @@ namespace CSConbinator
                     if (ret.Ret.AstNode != null)
                     {
                         lexemes.Add(ret.Ret.AstNode.Lexeme);
-
-                        if (ret.Ret.AstNode.Children != null)
-                        {
-                            children.AddRange(ret.Ret.AstNode.Children);
-                        }
+                        children.Add(ret.Ret.AstNode);
                     }
 
                     if (ret2.Ret.AstNode != null)
                     {
                         lexemes.Add(ret2.Ret.AstNode.Lexeme);
-
-                        if (ret2.Ret.AstNode.Children != null)
-                        {
-                            children.AddRange(ret2.Ret.AstNode.Children);
-                        }
+                        children.Add(ret2.Ret.AstNode);
                     }
 
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
@@ -124,7 +117,7 @@ namespace CSConbinator
                 });
         }
 
-        public Combinator Bor(Combinator other)
+        private Combinator Bor(Combinator other)
         {
             var name = $"{Common.InnerSymbol}({Name} | {other.Name})";
             var info =

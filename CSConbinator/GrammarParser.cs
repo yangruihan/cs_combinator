@@ -18,12 +18,12 @@ namespace CSConbinator
             _g["suffix"] = Token("*") | Token("?") | Token("+");
             _g["TERMINATOR"] = UserToken("TERMINATOR", (src, offset) =>
             {
-                switch (src[(int) offset])
+                switch (src[(int)offset])
                 {
                     case '"':
                     {
                         var len = 1;
-                        var i = (int) (offset + 1);
+                        var i = (int)(offset + 1);
                         while (i < src.Length)
                         {
                             if (src[i] == '\\' && src[i + 1] == '"')
@@ -41,13 +41,13 @@ namespace CSConbinator
                             i++;
                         }
 
-                        return (uint) len;
+                        return (uint)len;
                     }
                     case '#':
                     {
                         var symbol = "#";
 
-                        for (var i = (int) (offset + 1); i < src.Length; i++)
+                        for (var i = (int)(offset + 1); i < src.Length; i++)
                         {
                             if (src[i] != '#')
                             {
@@ -64,7 +64,7 @@ namespace CSConbinator
                         var idx = offset + len;
                         while (idx < src.Length)
                         {
-                            if (src.SafeSubstring((int) idx, symbol.Length) == symbol)
+                            if (src.SafeSubstring((int)idx, symbol.Length) == symbol)
                             {
                                 len += symbol.Length;
                                 break;
@@ -74,7 +74,7 @@ namespace CSConbinator
                             idx++;
                         }
 
-                        return (uint) (offset + len);
+                        return (uint)len;
                     }
                     default:
                         return 0;
@@ -92,7 +92,8 @@ namespace CSConbinator
 
         public override string ToString()
         {
-            return $"GrammarParser:\n{GrammarStr(_g)}";
+            return
+                $"GrammarParser:\n{GrammarStr(_g, new[] { "products", "product", "expr", "or_expr", "many", "paren", "primary", "SUFFIX", "TERMINATOR", "SYMBOL", "EOL", })}";
         }
     }
 }

@@ -16,26 +16,26 @@ namespace CSConbinator
     {
         private static readonly Dictionary<string, string> EscapeMap = new Dictionary<string, string>
         {
-            {"\\n", "\n"},
-            {"\\r", "\r"},
-            {"\\t", "\t"},
-            {"\\v", "\v"},
-            {"\\\\", "\\"},
-            {"\\'", "'"},
-            {"\\\"", "\""},
-            {"\\0", "\0"}
+            { "\\n", "\n" },
+            { "\\r", "\r" },
+            { "\\t", "\t" },
+            { "\\v", "\v" },
+            { "\\\\", "\\" },
+            { "\\'", "'" },
+            { "\\\"", "\"" },
+            { "\\0", "\0" }
         };
 
         private static readonly Dictionary<string, string> EscapeMap2 = new Dictionary<string, string>
         {
-            {"\n", "\\n"},
-            {"\r", "\\r"},
-            {"\t", "\\t"},
-            {"\v", "\\v"},
-            {"\\", "\\\\"},
-            {"'", "\\'"},
-            {"\"", "\\\""},
-            {"\0", "\\0"}
+            { "\n", "\\n" },
+            { "\r", "\\r" },
+            { "\t", "\\t" },
+            { "\v", "\\v" },
+            { "\\", "\\\\" },
+            { "'", "\\'" },
+            { "\"", "\\\"" },
+            { "\0", "\\0" }
         };
 
         public static Result<Token[]> Tokenize(string src, Tuple<string, string>[] rules)
@@ -48,13 +48,13 @@ namespace CSConbinator
         {
             for (var i = offset; i < src.Length; i++)
             {
-                if (!char.IsWhiteSpace(src[(int) i]))
+                if (src[(int)i] == '\n' || !char.IsWhiteSpace(src[(int)i]))
                 {
                     return i;
                 }
             }
 
-            return (uint) src.Length;
+            return (uint)src.Length;
         }
 
         public static Combinator UserToken(string _, UserTokenCallback callback)
@@ -73,7 +73,7 @@ namespace CSConbinator
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
-                            Lexeme = src.Substring((int) offset, (int) len),
+                            Lexeme = src.Substring((int)offset, (int)len),
                             Children = null,
                             Offset = offset + len
                         });
@@ -81,7 +81,7 @@ namespace CSConbinator
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseUserTokenError(
-                            $"parse user_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                            $"parse user_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                 });
         }
 
@@ -89,8 +89,6 @@ namespace CSConbinator
         {
             var name = $"{Common.InnerSymbol}re_token";
             var info = $"re\"{re}\"";
-
-            // re = re.StartsWith("^") ? re : $"^{re}";
 
             var regex = new Regex(re, RegexOptions.Compiled);
 
@@ -101,21 +99,21 @@ namespace CSConbinator
                 {
                     offset = SkipWhitespace(src, offset);
 
-                    var match = regex.Match(src, (int) offset);
+                    var match = regex.Match(src, (int)offset);
 
-                    if (match.Success)
+                    if (match.Success && match.Index == offset)
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
-                            Lexeme = src.Substring((int) offset, match.Length),
+                            Lexeme = src.Substring((int)offset, match.Length),
                             Children = null,
-                            Offset = (uint) (offset + match.Length)
+                            Offset = (uint)(offset + match.Length)
                         });
                     }
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseReTokenError(
-                            $"parse re_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                            $"parse re_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                 });
         }
 
@@ -136,35 +134,36 @@ namespace CSConbinator
                 {
                     offset = SkipWhitespace(src, offset);
 
-                    var subStr = src.SafeSubstring((int) offset, literal.Length);
+                    var subStr = src.SafeSubstring((int)offset, literal.Length);
+
                     if (subStr == literal)
                     {
                         if (sepCheckFunc != null)
                         {
-                            if (sepCheckFunc(src[(int) (offset + literal.Length)]))
+                            if (sepCheckFunc(src[(int)(offset + literal.Length)]))
                             {
                                 return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                                 {
                                     Lexeme = literal,
                                     Children = null,
-                                    Offset = (uint) (offset + literal.Length)
+                                    Offset = (uint)(offset + literal.Length)
                                 });
                             }
 
                             return Result<ParseCallbackRet>.Err(new ParseTokenSepCheckFuncError(
-                                $"parse token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                                $"parse token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                         }
 
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = literal,
                             Children = null,
-                            Offset = (uint) (offset + literal.Length)
+                            Offset = (uint)(offset + literal.Length)
                         });
                     }
 
                     return Result<ParseCallbackRet>.Err(new ParseTokenError(
-                        $"parse token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                        $"parse token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                 });
         }
 
@@ -220,7 +219,7 @@ namespace CSConbinator
                     {
                         return Result<ParseCallbackRet>.Err(
                             new ParseMany1Error(
-                                $"parse many1 {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                                $"parse many1 {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                     }
 
                     var children = new List<AstNode>();
@@ -259,7 +258,7 @@ namespace CSConbinator
                 {
                     var ret = c.Parse(src, offset);
                     var children = ret.IsSuccess && ret.Ret.AstNode != null
-                        ? new List<AstNode> {ret.Ret.AstNode}
+                        ? new List<AstNode> { ret.Ret.AstNode }
                         : null;
 
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
@@ -287,7 +286,7 @@ namespace CSConbinator
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = ret.Ret.AstNode.Lexeme,
-                            Children = new List<AstNode> {ret.Ret.AstNode},
+                            Children = new List<AstNode> { ret.Ret.AstNode },
                             Offset = ret.Ret.Offset
                         });
                     }
@@ -315,7 +314,7 @@ namespace CSConbinator
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseMany1Error(
-                            $"parse eof failed, at '{src.SafeSubstring((int) offset, 30)}'"));
+                            $"parse eof failed, at '{src.SafeSubstring((int)offset, 30)}'"));
                 });
         }
 
@@ -325,7 +324,8 @@ namespace CSConbinator
             return ret.IsSuccess ? Result<AstNode>.Ok(ret.Ret.AstNode) : Result<AstNode>.Err(ret.Error);
         }
 
-        public static List<object> VisitAst(AstNode ast, VisitFuncDelegate visitFunc, object userData, AstNode parent = null,
+        public static List<object> VisitAst(AstNode ast, VisitFuncDelegate visitFunc, object userData,
+            AstNode parent = null,
             int idx = 0)
         {
             var ret = visitFunc(ast, parent, idx, userData);
@@ -343,7 +343,7 @@ namespace CSConbinator
                 return userDataList;
             }
 
-            return new List<object> {ret.Item2};
+            return new List<object> { ret.Item2 };
         }
 
         public static object VisitAstPostOrder(AstNode ast, VisitFuncPostOrderDelegate visitFunc, object userData,
@@ -369,13 +369,13 @@ namespace CSConbinator
             void InnerAstStr(AstNode node, int i, StringBuilder sb)
             {
                 sb.Append(string.Concat(Enumerable.Repeat(" ", i)));
-                sb.AppendLine(ast.ToString());
+                sb.AppendLine(node.ToString());
 
-                if (!ast.Children.IsNullOrEmpty())
+                if (!node.Children.IsNullOrEmpty())
                 {
-                    foreach (var astChild in ast.Children)
+                    foreach (var astChild in node.Children)
                     {
-                        InnerAstStr(astChild, indent + 4, sb);
+                        InnerAstStr(astChild, i + 4, sb);
                     }
                 }
             }
