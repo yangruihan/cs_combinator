@@ -272,7 +272,7 @@ public class ${ClassName}: IParser
                 return Result<string>.Err(ret.Error);
             }
 
-            var grammarCodeSrc = grammar.ToCodeString();
+            var grammarCodeSrc = grammar.GrammarCodeStr(productList.ToArray());
 
             var finalStr = Template.Replace("${ClassName}", className)
                 .Replace("${ProductList}", string.Join(", ", productList.Select(i => $"\"{i}\"")))

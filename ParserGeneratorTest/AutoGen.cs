@@ -21,15 +21,21 @@ public class GrammarParser: IParser
     public GrammarParser()
     {
         _g["products"] = (Many(Group(((_g["product"] + Many1(Group(Token(";")))) + Many(Group(_g["EOL"]))))) + _g["EOF"]);
+
 _g["product"] = ((_g["SYMBOL"] + Token("=")) + _g["expr"]);
-_g["EOL"] = Token("\n");
-_g["SYMBOL"] = ReToken(@"[A-Za-z_][\w]*");
+
 _g["expr"] = Many1(Group((_g["or_expr"] + Many(Group(_g["EOL"])))));
+
 _g["or_expr"] = (_g["many"] + Many(Group(((Many(Group(_g["EOL"])) + Token("|")) + _g["many"]))));
+
 _g["many"] = (_g["paren"] + Maybe(Group(_g["SUFFIX"])));
+
 _g["paren"] = (_g["primary"] | Group(((Token("(") + Many1(Group((_g["or_expr"] + Many(Group(_g["EOL"])))))) + Token(")"))));
-_g["SUFFIX"] = ((Token("*") | Token("?")) | Token("+"));
+
 _g["primary"] = (_g["TERMINATOR"] | _g["SYMBOL"]);
+
+_g["SUFFIX"] = ((Token("*") | Token("?")) | Token("+"));
+
 _g["TERMINATOR"] = UserToken("_", 
 
             (src, offset) =>
@@ -97,6 +103,11 @@ _g["TERMINATOR"] = UserToken("_",
                 }
             }
             );
+
+_g["SYMBOL"] = ReToken(@"[A-Za-z_][\w]*");
+
+_g["EOL"] = Token("\n");
+
 _g["EOF"] = Eof();
 
     }
