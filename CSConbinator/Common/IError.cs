@@ -23,19 +23,22 @@ namespace CSConbinator
 
         public override string Error()
         {
-            return $"{ErrorName}: {_message}\nTrace:\n{_frameInfo}";
+            // return $"{ErrorName}: {_message}\nTrace:\n{_frameInfo}";
+            return $"{ErrorName}: {_message}";
         }
 
         private string GetFrameInfo()
         {
+            // TODO opt
+            
             var sb = new StringBuilder();
-            var stack = new StackTrace(3, true);
-            for (var i = 0; i < stack.FrameCount; i++)
-            {
-                var frame = stack.GetFrame(i);
-                sb.AppendLine(
-                    $"\tFile: {frame.GetFileName()}  Func: {frame.GetMethod().Name}  Line: {frame.GetFileLineNumber()}");
-            }
+            // var stack = new StackTrace(3, true);
+            // for (var i = 0; i < stack.FrameCount; i++)
+            // {
+            //     var frame = stack.GetFrame(i);
+            //     sb.AppendLine(
+            //         $"\tFile: {frame.GetFileName()}  Func: {frame.GetMethod().Name}  Line: {frame.GetFileLineNumber()}");
+            // }
 
             return sb.ToString();
         }
