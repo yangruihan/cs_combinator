@@ -18,7 +18,7 @@ namespace GrammarParseTest
 
             Console.WriteLine("------");
 
-            var ret = parser.Parse(File.ReadAllText("grammar.txt").Trim());
+            var ret = parser.ParseFile("grammar.txt");
             if (ret.IsSuccess)
             {
                 Console.Write(Parser.AstStr(ret.Ret));
