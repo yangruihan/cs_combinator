@@ -1,0 +1,78 @@
+products   = ( product ( ";" )+ ( EOL )* )* EOF;
+
+product    = SYMBOL "=" expr;
+expr       = ( or_expr ( EOL )* )+;
+or_expr    = many ( ( EOL )* "|" many )*;
+many       = paren ( SUFFIX )?;
+paren      = primary | ( "(" expr ")" );
+primary    = TERMINATOR | SYMBOL;
+
+SUFFIX     = "*" | "?" | "+";
+TERMINATOR = #native#
+            (src, offset) =>
+            {
+                switch (src[(int)offset])
+                {
+                    case '"':
+                    {
+                        var len = 1;
+                        var i = (int)(offset + 1);
+                        while (i < src.Length)
+                        {
+                            if (src[i] == '\\' && src[i + 1] == '"')
+                            {
+                                i++;
+                                len++;
+                            }
+                            else if (src[i] == '"')
+                            {
+                                len++;
+                                break;
+                            }
+
+                            len++;
+                            i++;
+                        }
+
+                        return (uint)len;
+                    }
+                    case '#':
+                    {
+                        var symbol = "#";
+
+                        for (var i = (int)(offset + 1); i < src.Length; i++)
+                        {
+                            if (src[i] != '#')
+                            {
+                                symbol += src[i];
+                            }
+                            else
+                            {
+                                symbol += "#";
+                                break;
+                            }
+                        }
+
+                        var len = symbol.Length;
+                        var idx = offset + len;
+                        while (idx < src.Length)
+                        {
+                            if (src.SafeSubstring((int)idx, symbol.Length) == symbol)
+                            {
+                                len += symbol.Length;
+                                break;
+                            }
+
+                            len++;
+                            idx++;
+                        }
+
+                        return (uint)len;
+                    }
+                    default:
+                        return 0;
+                }
+            }
+            #native#;
+SYMBOL     = #re#[A-Za-z_][\w]*#re#;
+EOL        = "\n";

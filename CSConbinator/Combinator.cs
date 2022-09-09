@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CSConbinator
 {
     public struct ParseRet
     {
-        public AstNode AstNode;
-        public uint Offset;
+        public readonly AstNode AstNode;
+        public readonly uint Offset;
 
         public ParseRet(AstNode node, uint offset)
         {
@@ -27,14 +28,16 @@ namespace CSConbinator
     {
         public string Name { get; set; }
         public string Info { get; set; }
+        public string Code { get; set; }
         public ParseCallback ParseCb { get; set; }
 
         internal Combinator Parent { get; set; }
 
-        public Combinator(string name, string info, ParseCallback parseCb)
+        public Combinator(string name, string info, string code, ParseCallback parseCb)
         {
             Name = name;
             Info = info;
+            Code = code;
             ParseCb = parseCb;
         }
 
@@ -46,6 +49,9 @@ namespace CSConbinator
             }
 
             var ret = ParseCb.Invoke(src, offset);
+
+            // Console.WriteLine(
+            //     $"invoke {Name}, {Info}, ret: {ret.Ret},offset: {offset}, retOffset {ret.Ret.Offset}, at {src.SafeSubstring((int)(ret.IsSuccess ? ret.Ret.Offset : offset), 30)}");
 
             if (!ret.IsSuccess)
             {
@@ -75,10 +81,12 @@ namespace CSConbinator
             var name = $"{Common.InnerSymbol}({Name} + {other.Name})";
             var info =
                 $"{(Name.IsInnerSymbol() ? Info : Name)} {(other.Name.IsInnerSymbol() ? other.Info : other.Name)}";
+            var code = $"({Code} + {other.Code})";
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = Parse(src, offset);
@@ -122,9 +130,12 @@ namespace CSConbinator
             var name = $"{Common.InnerSymbol}({Name} | {other.Name})";
             var info =
                 $"{(Name.IsInnerSymbol() ? Info : Name)} | {(other.Name.IsInnerSymbol() ? other.Info : other.Name)}";
+            var code = $"({Code} | {other.Code})";
+
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = Parse(src, offset);

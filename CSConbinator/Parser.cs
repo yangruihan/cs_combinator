@@ -8,36 +8,13 @@ namespace CSConbinator
 {
     public delegate uint UserTokenCallback(string src, uint offset);
 
-    public delegate Tuple<bool, object> VisitFuncDelegate(AstNode ast, AstNode parent, int idx, object userData);
+    public delegate Result<Tuple<bool, T>>
+        VisitFuncDelegate<T>(AstNode ast, AstNode parent, int idx, T userData);
 
-    public delegate object VisitFuncPostOrderDelegate(AstNode ast, AstNode parent, int idx, object userData);
+    public delegate Result<T> VisitFuncPostOrderDelegate<T>(AstNode ast, AstNode parent, int idx, List<T> userData);
 
-    public class Parser
+    public static class Parser
     {
-        private static readonly Dictionary<string, string> EscapeMap = new Dictionary<string, string>
-        {
-            { "\\n", "\n" },
-            { "\\r", "\r" },
-            { "\\t", "\t" },
-            { "\\v", "\v" },
-            { "\\\\", "\\" },
-            { "\\'", "'" },
-            { "\\\"", "\"" },
-            { "\\0", "\0" }
-        };
-
-        private static readonly Dictionary<string, string> EscapeMap2 = new Dictionary<string, string>
-        {
-            { "\n", "\\n" },
-            { "\r", "\\r" },
-            { "\t", "\\t" },
-            { "\v", "\\v" },
-            { "\\", "\\\\" },
-            { "'", "\\'" },
-            { "\"", "\\\"" },
-            { "\0", "\\0" }
-        };
-
         public static Result<Token[]> Tokenize(string src, Tuple<string, string>[] rules)
         {
             var scanner = new Scanner();
@@ -57,12 +34,16 @@ namespace CSConbinator
             return (uint)src.Length;
         }
 
-        public static Combinator UserToken(string _, UserTokenCallback callback)
+        public static Combinator UserToken(string symbol, UserTokenCallback callback)
         {
-            var name = $"{Common.InnerSymbol}user_token";
+            var name = $"{Common.InnerSymbol}user_token[{symbol.ToReadable()}]";
+            var info = $"{name}<{callback}>";
+            var code = $"UserToken(\"{symbol.ToReadable()}\", null)";
+
             return new Combinator(
                 name,
-                $"{name}<{callback}>",
+                info,
+                code,
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
@@ -85,16 +66,33 @@ namespace CSConbinator
                 });
         }
 
+        public static Combinator NativeHandleToken(string symbol, string srcCode)
+        {
+            var name = $"{Common.InnerSymbol}native_handle_token[{symbol.ToReadable()}]";
+            var info = $"{name}<native_handle_token>";
+            var code = $"UserToken(\"{symbol.ToReadable()}\", \n{srcCode})";
+
+            return new Combinator(
+                name,
+                info,
+                code,
+                (src, offset) => Result<ParseCallbackRet>.Err(
+                    new ParseNativeHandleTokenError(
+                        $"parse native_handle_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'")));
+        }
+
         public static Combinator ReToken(string re)
         {
             var name = $"{Common.InnerSymbol}re_token";
-            var info = $"re\"{re}\"";
+            var info = $"re\"{re.ToReadable()}\"";
+            var code = $"ReToken(@\"{re}\")";
 
             var regex = new Regex(re, RegexOptions.Compiled);
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
@@ -117,19 +115,24 @@ namespace CSConbinator
                 });
         }
 
-        public static Combinator Token(string literal, Func<char, bool> sepCheckFunc = null)
+        public static Combinator Token(string literal, Func<char, bool> sepCheckFunc = null,
+            bool useDefaultSepCheck = false)
         {
             var name = $"{Common.InnerSymbol}token";
-            var info = $"\"{literal}\"";
+            var info = $"\"{literal.ToReadable()}\"";
+            var code = useDefaultSepCheck
+                ? $"Token(\"{literal.ToReadable()}\", null, true)"
+                : $"Token(\"{literal.ToReadable()}\")";
 
-            if (EscapeMap2.TryGetValue(literal, out var s))
+            if (useDefaultSepCheck)
             {
-                info = $"\"{s}\"";
+                sepCheckFunc = Common.DefaultSepCheckFunc;
             }
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
@@ -171,10 +174,12 @@ namespace CSConbinator
         {
             var name = $"{Common.InnerSymbol}many";
             var info = $"({(c.Name.IsInnerSymbol() ? c.Info : c.Name)})*";
+            var code = $"Many({c.Code})";
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = c.Parse(src, offset);
@@ -207,10 +212,12 @@ namespace CSConbinator
         {
             var name = $"{Common.InnerSymbol}many1";
             var info = $"({(c.Name.IsInnerSymbol() ? c.Info : c.Name)})+";
+            var code = $"Many1({c.Code})";
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = c.Parse(src, offset);
@@ -250,10 +257,12 @@ namespace CSConbinator
         {
             var name = $"{Common.InnerSymbol}maybe";
             var info = $"({(c.Name.IsInnerSymbol() ? c.Info : c.Name)})?";
+            var code = $"Maybe({c.Code})";
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = c.Parse(src, offset);
@@ -274,10 +283,12 @@ namespace CSConbinator
         {
             var name = $"{Common.InnerSymbol}group";
             var info = $"( {(c.Name.IsInnerSymbol() ? c.Info : c.Name)} )";
+            var code = $"Group({c.Code})";
 
             return new Combinator(
                 name,
                 info,
+                code,
                 (src, offset) =>
                 {
                     var ret = c.Parse(src, offset);
@@ -299,6 +310,7 @@ namespace CSConbinator
         {
             return new Combinator(
                 $"{Common.InnerSymbol}eof",
+                "EOF",
                 "EOF",
                 (src, offset) =>
                 {
@@ -324,32 +336,41 @@ namespace CSConbinator
             return ret.IsSuccess ? Result<AstNode>.Ok(ret.Ret.AstNode) : Result<AstNode>.Err(ret.Error);
         }
 
-        public static List<object> VisitAst(AstNode ast, VisitFuncDelegate visitFunc, object userData,
+        public static Result<List<T>> VisitAst<T>(AstNode ast, VisitFuncDelegate<T> visitFunc, T userData,
             AstNode parent = null,
             int idx = 0)
         {
             var ret = visitFunc(ast, parent, idx, userData);
 
-            if (ret.Item1 && !ast.Children.IsNullOrEmpty())
+            if (!ret.IsSuccess)
             {
-                var userDataList = new List<object>();
-                for (var i = 0; i < ast.Children.Count; i++)
-                {
-                    var astChild = ast.Children[i];
-                    var visitRet = VisitAst(astChild, visitFunc, userData, ast, i);
-                    userDataList.AddRange(visitRet);
-                }
-
-                return userDataList;
+                return Result<List<T>>.Err(ret.Error);
             }
 
-            return new List<object> { ret.Item2 };
+            if (ast.Children.IsNullOrEmpty()) return Result<List<T>>.Ok(new List<T> { ret.Ret.Item2 });
+
+            var userDataList = new List<T>();
+            for (var i = 0; i < ast.Children.Count; i++)
+            {
+                var astChild = ast.Children[i];
+                var visitRet = VisitAst(astChild, visitFunc, userData, ast, i);
+
+                if (!visitRet.IsSuccess)
+                {
+                    return Result<List<T>>.Err(visitRet.Error);
+                }
+
+                userDataList.AddRange(visitRet.Ret);
+            }
+
+            return Result<List<T>>.Ok(userDataList);
         }
 
-        public static object VisitAstPostOrder(AstNode ast, VisitFuncPostOrderDelegate visitFunc, object userData,
+        public static Result<T> VisitAstPostOrder<T>(AstNode ast, VisitFuncPostOrderDelegate<T> visitFunc,
+            T userData = default,
             AstNode parent = null, int idx = 0)
         {
-            var userDataList = new List<object>();
+            var userDataList = new List<T>();
 
             if (!ast.Children.IsNullOrEmpty())
             {
@@ -357,7 +378,13 @@ namespace CSConbinator
                 {
                     var astChild = ast.Children[i];
                     var visitRet = VisitAstPostOrder(astChild, visitFunc, userData, ast, i);
-                    userDataList.Add(visitRet);
+
+                    if (!visitRet.IsSuccess)
+                    {
+                        return Result<T>.Err(visitRet.Error);
+                    }
+
+                    userDataList.Add(visitRet.Ret);
                 }
             }
 
@@ -386,7 +413,7 @@ namespace CSConbinator
             return stringBuilder.ToString();
         }
 
-        public static string GrammarStr(Grammar g, string[] order = null)
+        public static string GrammarStr(this Grammar g, string[] order = null)
         {
             if (order == null)
             {
@@ -400,6 +427,31 @@ namespace CSConbinator
                 var value = g[o];
                 sb.AppendLine($"{o} = {value.Info};\n");
             }
+
+            return sb.ToString();
+        }
+
+        public static string GrammarCodeStr(this Grammar g, string[] order = null, string grammarName = "_g")
+        {
+            if (order == null)
+            {
+                return g.ToCodeString(grammarName);
+            }
+
+            var sb = new StringBuilder();
+
+            foreach (var o in order)
+            {
+                if (o == "EOF")
+                {
+                    continue;
+                }
+
+                var value = g[o];
+                sb.AppendLine($"{grammarName}[\"{o}\"] = {Grammar.ReplaceTempSymbolName(value.Code, grammarName)};\n");
+            }
+
+            sb.AppendLine($"{grammarName}[\"EOF\"] = Eof();");
 
             return sb.ToString();
         }

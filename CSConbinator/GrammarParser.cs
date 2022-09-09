@@ -2,21 +2,39 @@ using static CSConbinator.Parser;
 
 namespace CSConbinator
 {
-    public class GrammarParser
+    public class GrammarParser : IParser
     {
+        public const string Products = "products";
+        public const string Product = "product";
+        public const string Expr = "expr";
+        public const string OrExpr = "or_expr";
+        public const string Many = "many";
+        public const string Paren = "paren";
+        public const string Primary = "primary";
+        public const string Suffix = "suffix";
+        public const string TERMINATOR = "TERMINATOR";
+        public const string SYMBOL = "SYMBOL";
+        public const string EOL = "EOL";
+        public const string EOF = "EOF";
+
         private readonly Grammar _g = new Grammar();
+
+        private readonly string[] _productList =
+        {
+            Products, Product, Expr, OrExpr, Many, Paren, Primary, Suffix, TERMINATOR, SYMBOL, EOL
+        };
 
         public GrammarParser()
         {
-            _g["products"] = Many(_g["product"] + Many1(Token(";")) + Many(_g["EOL"])) + _g["EOF"];
-            _g["product"] = _g["SYMBOL"] + Token("=") + _g["expr"];
-            _g["expr"] = Many1(_g["or_expr"] + Many(_g["EOL"]));
-            _g["or_expr"] = _g["many"] + Many(Many(_g["EOL"]) + Token("|") + _g["many"]);
-            _g["many"] = _g["paren"] + Maybe(_g["suffix"]);
-            _g["paren"] = _g["primary"] | Group(Token("(") + _g["expr"] + Token(")"));
-            _g["primary"] = _g["TERMINATOR"] | _g["SYMBOL"];
-            _g["suffix"] = Token("*") | Token("?") | Token("+");
-            _g["TERMINATOR"] = UserToken("TERMINATOR", (src, offset) =>
+            _g[Products] = Many(_g[Product] + Many1(Token(";")) + Many(_g[EOL])) + _g[EOF];
+            _g[Product] = _g[SYMBOL] + Token("=") + _g[Expr];
+            _g[Expr] = Many1(_g[OrExpr] + Many(_g[EOL]));
+            _g[OrExpr] = _g[Many] + Many(Many(_g[EOL]) + Token("|") + _g[Many]);
+            _g[Many] = _g[Paren] + Maybe(_g[Suffix]);
+            _g[Paren] = _g[Primary] | Group(Token("(") + _g[Expr] + Token(")"));
+            _g[Primary] = _g[TERMINATOR] | _g[SYMBOL];
+            _g[Suffix] = Token("*") | Token("?") | Token("+");
+            _g[TERMINATOR] = UserToken(TERMINATOR, (src, offset) =>
             {
                 switch (src[(int)offset])
                 {
@@ -80,20 +98,31 @@ namespace CSConbinator
                         return 0;
                 }
             });
-            _g["SYMBOL"] = ReToken(@"[A-Za-z_][\w]*");
-            _g["EOL"] = Token("\n");
-            _g["EOF"] = Eof();
+            _g[SYMBOL] = ReToken(@"[A-Za-z_][\w]*");
+            _g[EOL] = Token("\n");
+            _g[EOF] = Eof();
         }
+
+        public Grammar Grammar => _g;
 
         public Result<AstNode> Parse(string grammar)
         {
-            return Parser.Parse(grammar, _g["products"]);
+            return Parser.Parse(grammar, _g[_productList[0]]);
+        }
+
+        public string GrammarString()
+        {
+            return ToString();
+        }
+
+        public string GrammarCodeString()
+        {
+            return _g.GrammarCodeStr(_productList);
         }
 
         public override string ToString()
         {
-            return
-                $"GrammarParser:\n{GrammarStr(_g, new[] { "products", "product", "expr", "or_expr", "many", "paren", "primary", "SUFFIX", "TERMINATOR", "SYMBOL", "EOL", })}";
+            return $"Grammar:\n{_g.GrammarStr(_productList)}";
         }
     }
 }

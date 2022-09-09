@@ -9,7 +9,15 @@ namespace GrammarParseTest
         public static void Main(string[] args)
         {
             var parser = new GrammarParser();
+
             Console.Write(parser);
+
+            Console.WriteLine("------");
+
+            Console.WriteLine(parser.GrammarCodeString());
+
+            Console.WriteLine("------");
+
             var ret = parser.Parse(File.ReadAllText("grammar.txt").Trim());
             if (ret.IsSuccess)
             {

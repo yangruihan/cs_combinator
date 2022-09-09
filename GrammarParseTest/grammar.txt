@@ -8,61 +8,71 @@ paren      = primary | ( "(" expr ")" );
 primary    = TERMINATOR | SYMBOL;
 
 SUFFIX     = "*" | "?" | "+";
-TERMINATOR = #lua#
-            function(src)
-                local mod = 0
+TERMINATOR = #native#
+            (src, offset) =>
+            {
+                switch (src[(int)offset])
+                {
+                    case '"':
+                    {
+                        var len = 1;
+                        var i = (int)(offset + 1);
+                        while (i < src.Length)
+                        {
+                            if (src[i] == '\\' && src[i + 1] == '"')
+                            {
+                                i++;
+                                len++;
+                            }
+                            else if (src[i] == '"')
+                            {
+                                len++;
+                                break;
+                            }
 
-                if src:sub(1, 1) == '"' then
-                    mod = 1
-                elseif src:sub(1, 1) == "#" then
-                    mod = 2
-                else
-                    return nil
-                end
+                            len++;
+                            i++;
+                        }
 
-                local len = 0
+                        return (uint)len;
+                    }
+                    case '#':
+                    {
+                        var symbol = "#";
 
-                if mod == 1 then
-                    len = 1
-                    local i = 2
-                    while i <= #src do
-                        if src:sub(i, i) == "\\" and src:sub(i + 1, i + 1) == '"' then
-                            i = i + 1
-                            len = len + 1
-                        elseif src:sub(i, i) == '"' then
-                            len = len + 1
-                            break
-                        end
+                        for (var i = (int)(offset + 1); i < src.Length; i++)
+                        {
+                            if (src[i] != '#')
+                            {
+                                symbol += src[i];
+                            }
+                            else
+                            {
+                                symbol += "#";
+                                break;
+                            }
+                        }
 
-                        len = len + 1
-                        i = i + 1
-                    end
-                else
-                    local symbol = "#"
-                    for i = 2, #src do
-                        if src:sub(i, i) ~= "#" then
-                            symbol = symbol .. src:sub(i, i)
-                        else
-                            symbol = symbol .. "#"
-                            break
-                        end
-                    end
+                        var len = symbol.Length;
+                        var idx = offset + len;
+                        while (idx < src.Length)
+                        {
+                            if (src.SafeSubstring((int)idx, symbol.Length) == symbol)
+                            {
+                                len += symbol.Length;
+                                break;
+                            }
 
-                    len = #symbol
-                    local i = len + 1
-                    while i <= #src do
-                        if src:sub(i, i + #symbol - 1) == symbol then
-                            len = len + #symbol
-                            break
-                        end
+                            len++;
+                            idx++;
+                        }
 
-                        len = len + 1
-                        i = i + 1
-                    end
-                end
-
-                return len
-            end
-            #lua#;
-SYMBOL     = #re#[%a_][%w_]*#re#;
+                        return (uint)len;
+                    }
+                    default:
+                        return 0;
+                }
+            }
+            #native#;
+SYMBOL     = #re#[A-Za-z_][\w]*#re#;
 EOL        = "\n";

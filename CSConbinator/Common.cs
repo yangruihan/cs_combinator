@@ -68,5 +68,44 @@ namespace CSConbinator
         {
             return astNodes == null || astNodes.Count == 0;
         }
+
+        public static readonly Dictionary<string, string> EscapeMap = new Dictionary<string, string>
+        {
+            { "\\\\", "\\" },
+            { "\\n", "\n" },
+            { "\\r", "\r" },
+            { "\\t", "\t" },
+            { "\\v", "\v" },
+            { "\\'", "'" },
+            { "\\\"", "\"" },
+            { "\\0", "\0" }
+        };
+
+        public static readonly Dictionary<string, string> EscapeMap2 = new Dictionary<string, string>
+        {
+            { "\\", "\\\\" },
+            { "\n", "\\n" },
+            { "\r", "\\r" },
+            { "\t", "\\t" },
+            { "\v", "\\v" },
+            { "'", "\\'" },
+            { "\"", "\\\"" },
+            { "\0", "\\0" }
+        };
+
+        public static string ToRaw(this string s)
+        {
+            return EscapeMap.Aggregate(s, (current, pair) => current.Replace(pair.Key, pair.Value));
+        }
+
+        public static string ToReadable(this string s)
+        {
+            return EscapeMap2.Aggregate(s, (current, pair) => current.Replace(pair.Key, pair.Value));
+        }
+
+        public static bool DefaultSepCheckFunc(char c)
+        {
+            return char.IsWhiteSpace(c);
+        }
     }
 }

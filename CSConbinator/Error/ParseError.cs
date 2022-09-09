@@ -29,6 +29,15 @@
         protected override string ErrorName => nameof(ParseUserTokenError);
     }
 
+    public class ParseNativeHandleTokenError : SimpleError
+    {
+        public ParseNativeHandleTokenError(string message) : base(message)
+        {
+        }
+
+        protected override string ErrorName => nameof(ParseNativeHandleTokenError);
+    }
+
     public class ParseReTokenError : SimpleError
     {
         public ParseReTokenError(string message) : base(message)
@@ -64,7 +73,7 @@
 
         protected override string ErrorName => nameof(ParseMany1Error);
     }
-    
+
     public class ParseEofError : SimpleError
     {
         public ParseEofError(string message) : base(message)
