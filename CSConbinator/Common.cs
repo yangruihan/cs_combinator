@@ -71,26 +71,26 @@ namespace CSConbinator
 
         public static readonly Dictionary<string, string> EscapeMap = new Dictionary<string, string>
         {
-            { "\\\\", "\\" },
-            { "\\n", "\n" },
-            { "\\r", "\r" },
-            { "\\t", "\t" },
-            { "\\v", "\v" },
-            { "\\'", "'" },
-            { "\\\"", "\"" },
-            { "\\0", "\0" }
+            {"\\\\", "\\"},
+            {"\\n", "\n"},
+            {"\\r", "\r"},
+            {"\\t", "\t"},
+            {"\\v", "\v"},
+            {"\\'", "'"},
+            {"\\\"", "\""},
+            {"\\0", "\0"}
         };
 
         public static readonly Dictionary<string, string> EscapeMap2 = new Dictionary<string, string>
         {
-            { "\\", "\\\\" },
-            { "\n", "\\n" },
-            { "\r", "\\r" },
-            { "\t", "\\t" },
-            { "\v", "\\v" },
-            { "'", "\\'" },
-            { "\"", "\\\"" },
-            { "\0", "\\0" }
+            {"\\", "\\\\"},
+            {"\n", "\\n"},
+            {"\r", "\\r"},
+            {"\t", "\\t"},
+            {"\v", "\\v"},
+            {"'", "\\'"},
+            {"\"", "\\\""},
+            {"\0", "\\0"}
         };
 
         public static string ToRaw(this string s)
@@ -105,7 +105,7 @@ namespace CSConbinator
 
         public static bool DefaultSepCheckFunc(char c)
         {
-            return char.IsWhiteSpace(c);
+            return !(char.IsNumber(c) || char.IsLetter(c));
         }
     }
 }
