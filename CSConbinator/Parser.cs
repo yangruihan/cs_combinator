@@ -48,6 +48,13 @@ namespace CSConbinator
                 {
                     offset = SkipWhitespace(src, offset);
 
+                    if (offset >= src.Length)
+                    {
+                        return Result<ParseCallbackRet>.Err(
+                            new ParseUserTokenError(
+                                $"parse user_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                    }
+
                     var len = callback(src, offset);
 
                     if (len > 0)
