@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CSConbinator
 {
@@ -17,6 +16,7 @@ namespace CSConbinator
 
     public struct ParseCallbackRet
     {
+        public int Pos;
         public string Lexeme;
         public List<AstNode> Children;
         public uint Offset;
@@ -60,19 +60,28 @@ namespace CSConbinator
 
             if (!Name.IsInnerSymbol())
             {
-                var node = new AstNode(Name, ret.Ret.Lexeme, Common.ReplaceInnerAstNode(ret.Ret.Children));
+                var node = new AstNode(Name,
+                    ret.Ret.Lexeme,
+                    ret.Ret.Pos,
+                    Common.ReplaceInnerAstNode(ret.Ret.Children));
                 return Result<ParseRet>.Ok(new ParseRet(node, ret.Ret.Offset));
             }
 
             if (!ret.Ret.Children.IsNullOrEmpty())
             {
                 return Result<ParseRet>.Ok(new ParseRet(
-                    new AstNode(Name, ret.Ret.Lexeme, ret.Ret.Children),
+                    new AstNode(Name,
+                        ret.Ret.Lexeme,
+                        ret.Ret.Pos,
+                        ret.Ret.Children),
                     ret.Ret.Offset));
             }
 
             return Result<ParseRet>.Ok(new ParseRet(
-                new AstNode(Name, ret.Ret.Lexeme, null),
+                new AstNode(Name,
+                    ret.Ret.Lexeme,
+                    ret.Ret.Pos,
+                    null),
                 ret.Ret.Offset));
         }
 
@@ -89,6 +98,8 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int) offset;
+
                     var ret = Parse(src, offset);
                     if (!ret.IsSuccess)
                     {
@@ -119,6 +130,7 @@ namespace CSConbinator
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                     {
                         Lexeme = Common.LexemeConcat(lexemes),
+                        Pos = pos,
                         Children = children,
                         Offset = ret2.Ret.Offset
                     });
@@ -138,13 +150,16 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int)offset;
+                    
                     var ret = Parse(src, offset);
                     if (ret.IsSuccess)
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = ret.Ret.AstNode == null ? "" : ret.Ret.AstNode.Lexeme,
-                            Children = ret.Ret.AstNode == null ? null : new List<AstNode> { ret.Ret.AstNode },
+                            Pos = pos,
+                            Children = ret.Ret.AstNode == null ? null : new List<AstNode> {ret.Ret.AstNode},
                             Offset = ret.Ret.Offset
                         });
                     }
@@ -155,7 +170,8 @@ namespace CSConbinator
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = ret.Ret.AstNode == null ? "" : ret.Ret.AstNode.Lexeme,
-                            Children = ret.Ret.AstNode == null ? null : new List<AstNode> { ret.Ret.AstNode },
+                            Pos = pos,
+                            Children = ret.Ret.AstNode == null ? null : new List<AstNode> {ret.Ret.AstNode},
                             Offset = ret.Ret.Offset
                         });
                     }

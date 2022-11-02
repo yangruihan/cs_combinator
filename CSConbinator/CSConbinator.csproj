@@ -53,6 +53,7 @@
         <Compile Include="GrammarParser.cs" />
         <Compile Include="Parser.cs" />
         <Compile Include="ParserGenerator.cs" />
+        <Compile Include="Pos.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Scanner.cs" />
         <Compile Include="Span.cs" />

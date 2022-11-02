@@ -7,7 +7,7 @@ namespace CSConbinator
         public string Type { get; }
         public string Rule { get; }
 
-        private Regex _ruleRegex;
+        private readonly Regex _ruleRegex;
 
         public TokenRule(string type, string rule)
         {
@@ -17,16 +17,16 @@ namespace CSConbinator
             _ruleRegex = new Regex(rule, RegexOptions.Compiled);
         }
 
-        public bool TryParse(string src, uint offset, out Token token)
+        public bool TryParse(string src, int offset, out Token token)
         {
             token = default;
 
-            var matchRet = _ruleRegex.Match(src, (int) offset);
+            var matchRet = _ruleRegex.Match(src, offset);
             if (matchRet.Success)
             {
                 token = new Token(Type, new Span
                 {
-                    Len = (uint) matchRet.Length,
+                    Len = matchRet.Length,
                     Start = offset
                 });
 

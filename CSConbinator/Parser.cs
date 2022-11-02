@@ -25,13 +25,13 @@ namespace CSConbinator
         {
             for (var i = offset; i < src.Length; i++)
             {
-                if (src[(int)i] == '\n' || !char.IsWhiteSpace(src[(int)i]))
+                if (src[(int) i] == '\n' || !char.IsWhiteSpace(src[(int) i]))
                 {
                     return i;
                 }
             }
 
-            return (uint)src.Length;
+            return (uint) src.Length;
         }
 
         public static Combinator UserToken(string symbol, UserTokenCallback callback)
@@ -47,21 +47,22 @@ namespace CSConbinator
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
+                    var pos = (int) offset;
 
                     if (offset >= src.Length)
                     {
                         return Result<ParseCallbackRet>.Err(
                             new ParseUserTokenError(
-                                $"parse user_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                                $"parse user_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                     }
 
                     var len = callback(src, offset);
-
                     if (len > 0)
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
-                            Lexeme = src.Substring((int)offset, (int)len),
+                            Lexeme = src.Substring((int) offset, (int) len),
+                            Pos = pos,
                             Children = null,
                             Offset = offset + len
                         });
@@ -69,7 +70,7 @@ namespace CSConbinator
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseUserTokenError(
-                            $"parse user_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                            $"parse user_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                 });
         }
 
@@ -85,7 +86,7 @@ namespace CSConbinator
                 code,
                 (src, offset) => Result<ParseCallbackRet>.Err(
                     new ParseNativeHandleTokenError(
-                        $"parse native_handle_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'")));
+                        $"parse native_handle_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'")));
         }
 
         public static Combinator ReToken(string re)
@@ -103,22 +104,24 @@ namespace CSConbinator
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
+                    var pos = (int) offset;
 
-                    var match = regex.Match(src, (int)offset);
+                    var match = regex.Match(src, (int) offset);
 
                     if (match.Success && match.Index == offset)
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
-                            Lexeme = src.Substring((int)offset, match.Length),
+                            Lexeme = src.Substring((int) offset, match.Length),
+                            Pos = pos,
                             Children = null,
-                            Offset = (uint)(offset + match.Length)
+                            Offset = (uint) (offset + match.Length)
                         });
                     }
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseReTokenError(
-                            $"parse re_token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                            $"parse re_token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                 });
         }
 
@@ -143,37 +146,40 @@ namespace CSConbinator
                 (src, offset) =>
                 {
                     offset = SkipWhitespace(src, offset);
+                    var pos = (int) offset;
 
-                    var subStr = src.SafeSubstring((int)offset, literal.Length);
+                    var subStr = src.SafeSubstring((int) offset, literal.Length);
 
                     if (subStr == literal)
                     {
                         if (sepCheckFunc != null)
                         {
-                            if (sepCheckFunc(src[(int)(offset + literal.Length)]))
+                            if (sepCheckFunc(src[(int) (offset + literal.Length)]))
                             {
                                 return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                                 {
                                     Lexeme = literal,
+                                    Pos = pos,
                                     Children = null,
-                                    Offset = (uint)(offset + literal.Length)
+                                    Offset = (uint) (offset + literal.Length)
                                 });
                             }
 
                             return Result<ParseCallbackRet>.Err(new ParseTokenSepCheckFuncError(
-                                $"parse token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                                $"parse token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                         }
 
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = literal,
+                            Pos = pos,
                             Children = null,
-                            Offset = (uint)(offset + literal.Length)
+                            Offset = (uint) (offset + literal.Length)
                         });
                     }
 
                     return Result<ParseCallbackRet>.Err(new ParseTokenError(
-                        $"parse token {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                        $"parse token {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                 });
         }
 
@@ -189,6 +195,8 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int) offset;
+
                     var ret = c.Parse(src, offset);
 
                     var children = new List<AstNode>();
@@ -209,6 +217,7 @@ namespace CSConbinator
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                     {
                         Lexeme = Common.LexemeConcat(lexemes),
+                        Pos = pos,
                         Children = children.Count > 0 ? children : null,
                         Offset = offset
                     });
@@ -227,13 +236,14 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int) offset;
                     var ret = c.Parse(src, offset);
 
                     if (!ret.IsSuccess)
                     {
                         return Result<ParseCallbackRet>.Err(
                             new ParseMany1Error(
-                                $"parse many1 {name} failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                                $"parse many1 {name} failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                     }
 
                     var children = new List<AstNode>();
@@ -254,6 +264,7 @@ namespace CSConbinator
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                     {
                         Lexeme = Common.LexemeConcat(lexemes),
+                        Pos = pos,
                         Children = children.Count > 0 ? children : null,
                         Offset = offset
                     });
@@ -272,14 +283,17 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int) offset;
+
                     var ret = c.Parse(src, offset);
                     var children = ret.IsSuccess && ret.Ret.AstNode != null
-                        ? new List<AstNode> { ret.Ret.AstNode }
+                        ? new List<AstNode> {ret.Ret.AstNode}
                         : null;
 
                     return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                     {
                         Lexeme = children == null ? "" : children[0].Lexeme,
+                        Pos = pos,
                         Children = children,
                         Offset = ret.IsSuccess ? ret.Ret.Offset : offset
                     });
@@ -298,13 +312,16 @@ namespace CSConbinator
                 code,
                 (src, offset) =>
                 {
+                    var pos = (int) offset;
+
                     var ret = c.Parse(src, offset);
                     if (ret.IsSuccess)
                     {
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = ret.Ret.AstNode.Lexeme,
-                            Children = new List<AstNode> { ret.Ret.AstNode },
+                            Pos = pos,
+                            Children = new List<AstNode> {ret.Ret.AstNode},
                             Offset = ret.Ret.Offset
                         });
                     }
@@ -326,6 +343,7 @@ namespace CSConbinator
                         return Result<ParseCallbackRet>.Ok(new ParseCallbackRet
                         {
                             Lexeme = $"{Common.InnerSymbol}eof",
+                            Pos = 0,
                             Children = null,
                             Offset = offset
                         });
@@ -333,7 +351,7 @@ namespace CSConbinator
 
                     return Result<ParseCallbackRet>.Err(
                         new ParseMany1Error(
-                            $"parse eof failed, at '{src.SafeSubstring((int)offset, 30)}'"));
+                            $"parse eof failed, at '{src.SafeSubstring((int) offset, 30)}'"));
                 });
         }
 
@@ -354,7 +372,7 @@ namespace CSConbinator
                 return Result<List<T>>.Err(ret.Error);
             }
 
-            if (ast.Children.IsNullOrEmpty()) return Result<List<T>>.Ok(new List<T> { ret.Ret.Item2 });
+            if (ast.Children.IsNullOrEmpty()) return Result<List<T>>.Ok(new List<T> {ret.Ret.Item2});
 
             var userDataList = new List<T>();
             for (var i = 0; i < ast.Children.Count; i++)
@@ -398,19 +416,25 @@ namespace CSConbinator
             return visitFunc(ast, parent, idx, userDataList);
         }
 
-        public static string AstStr(AstNode ast, int indent = 0)
+        public static string AstStr(AstNode ast, int indent = 0, string filename = "", string src = "")
         {
             void InnerAstStr(AstNode node, int i, StringBuilder sb)
             {
                 sb.Append(string.Concat(Enumerable.Repeat(" ", i)));
-                sb.AppendLine(node.ToString());
-
-                if (!node.Children.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(filename) && !string.IsNullOrEmpty(src))
                 {
-                    foreach (var astChild in node.Children)
-                    {
-                        InnerAstStr(astChild, i + 4, sb);
-                    }
+                    sb.AppendLine(node.ToStringWithPos(filename, src));
+                }
+                else
+                {
+                    sb.AppendLine(node.ToString());
+                }
+
+                if (node.Children.IsNullOrEmpty()) return;
+
+                foreach (var astChild in node.Children)
+                {
+                    InnerAstStr(astChild, i + 4, sb);
                 }
             }
 

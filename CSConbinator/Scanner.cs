@@ -7,7 +7,7 @@ namespace CSConbinator
         public Result<Token[]> Scan(string src, TokenRule[] rules)
         {
             var ret = new List<Token>();
-            uint offset = 0;
+            int offset = 0;
 
             while (offset < src.Length)
             {
