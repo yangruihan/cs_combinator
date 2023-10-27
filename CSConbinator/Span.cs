@@ -27,7 +27,7 @@ namespace CSConbinator
 
         public static Span operator +(Span a, Span b)
         {
-            Debug.Assert(a.Start < b.Start);
+            Debug.Assert(a.Start <= b.Start);
 
             Span ret;
             ret.Start = a.Start;
