@@ -1,6 +1,6 @@
-using static CSConbinator.Parser;
+using static CSCombinator.Parser;
 
-namespace CSConbinator
+namespace CSCombinator
 {
     public class GrammarParser : IParser
     {

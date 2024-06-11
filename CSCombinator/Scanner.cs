@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace CSConbinator
+namespace CSCombinator
 {
     public class Scanner
     {

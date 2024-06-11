@@ -1,4 +1,4 @@
-namespace CSConbinator
+namespace CSCombinator
 {
     public struct Result<TRet>
     {

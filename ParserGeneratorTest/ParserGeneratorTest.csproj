@@ -44,9 +44,9 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\CSConbinator\CSConbinator.csproj">
+      <ProjectReference Include="..\CSCombinator\CSCombinator.csproj">
         <Project>{ddbcecd6-21ba-41bd-af3b-81dcd330444e}</Project>
-        <Name>CSConbinator</Name>
+        <Name>CSCombinator</Name>
       </ProjectReference>
     </ItemGroup>
     <ItemGroup>

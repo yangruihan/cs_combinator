@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace CSConbinator
+namespace CSCombinator
 {
     [Serializable]
     public class Pos

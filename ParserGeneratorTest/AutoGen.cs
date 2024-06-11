@@ -3,9 +3,9 @@
 // Auto Generated
 // ---------------
 
-using CSConbinator;
+using CSCombinator;
 
-using static CSConbinator.Parser;
+using static CSCombinator.Parser;
 
 public class GrammarParser: IParser
 {
@@ -112,9 +112,9 @@ _g["EOF"] = Eof();
 
     }
 
-    public Result<AstNode> Parse(string grammar)
+    public Result<AstNode> Parse(string source)
     {
-        return Parser.Parse(grammar, _g[_productList[0]]);
+        return Parser.Parse(source, _g[_productList[0]]);
     }
 
     public string GrammarString()

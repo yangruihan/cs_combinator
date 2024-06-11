@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace CSConbinator
+namespace CSCombinator
 {
     public class TokenRule
     {

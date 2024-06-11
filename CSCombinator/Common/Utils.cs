@@ -1,6 +1,6 @@
 using System;
 
-namespace CSConbinator
+namespace CSCombinator
 {
     public static class StrUtils
     {

@@ -4,14 +4,13 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{8D168C37-96E7-4D41-92C6-86CCFC28D5C2}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <ProjectGuid>{DDBCECD6-21BA-41BD-AF3B-81DCD330444E}</ProjectGuid>
+        <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>GrammarParseTest</RootNamespace>
-        <AssemblyName>GrammarParseTest</AssemblyName>
+        <RootNamespace>CSConbinator</RootNamespace>
+        <AssemblyName>CSCombinator</AssemblyName>
         <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -39,17 +38,27 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Program.cs" />
+        <Compile Include="AstNode.cs" />
+        <Compile Include="AstNodeUtils.cs" />
+        <Compile Include="Combinator.cs" />
+        <Compile Include="Common.cs" />
+        <Compile Include="Common\IError.cs" />
+        <Compile Include="Common\IParser.cs" />
+        <Compile Include="Common\Result.cs" />
+        <Compile Include="Common\Utils.cs" />
+        <Compile Include="Error\GenError.cs" />
+        <Compile Include="Error\ParseError.cs" />
+        <Compile Include="Error\ScanError.cs" />
+        <Compile Include="Grammar.cs" />
+        <Compile Include="GrammarParser.cs" />
+        <Compile Include="Parser.cs" />
+        <Compile Include="ParserGenerator.cs" />
+        <Compile Include="Pos.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\CSCombinator\CSCombinator.csproj">
-        <Project>{ddbcecd6-21ba-41bd-af3b-81dcd330444e}</Project>
-        <Name>CSCombinator</Name>
-      </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-      <Content Include="grammar.txt" />
+        <Compile Include="Scanner.cs" />
+        <Compile Include="Span.cs" />
+        <Compile Include="Token.cs" />
+        <Compile Include="TokenRule.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,4 +1,4 @@
-namespace CSConbinator
+namespace CSCombinator
 {
     public abstract class ScanError : IError
     {
